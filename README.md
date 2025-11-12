@@ -8,12 +8,21 @@
 - Utilizar lista de Adjacência
 
 
+### Tipo de grafo
+
 - Grafo não orientado
 - Valorado por tipo ( Satélite | wifi | Cabo | fibra )
 - Vertices por tipo de dispositivo ( Servidor | Switch | Computador | Access Point )
 
 
-## Exemplo de mermaid
+### Restrições de Conexção
+
+- Servidor só conecta com switch
+- Computador conecta com switch e com Access Point
+- Access Point só conecta com Switch
+
+
+### Exemplo de mermaid
 
 ```mermaid
 graph TD
