@@ -44,3 +44,10 @@ graph TD
 Neste exemplo:
 - Cada nó representa um dispositivo na rede, podendo ser: Servidor, Switch, Computador ou Access Point.
 - As setas representam conexões, rotuladas pelo tipo: WiFi, Cabo, Satélite, Fibra.
+
+Para buildar o projeto
+
+``` shell
+make
+```
+
