@@ -26,19 +26,19 @@
 
 ```mermaid
 graph TD
-    A[Servidor 1] -- Fibra --> B[Switch 1]
-    B -- WiFi --> C[Computador 1]
-    B -- Cabo --> D[Access Point 1]
-    D -- WiFi --> E[Computador 2]
-    B -- Satélite --> F[Servidor 2]
-    F -- Fibra --> G[Switch 2]
-    G -- Cabo --> H[Computador 3]
-    G -- WiFi --> I[Access Point 2]
-    I -- WiFi --> J[Computador 4]
-    G -- Satélite --> K[Servidor 3]
-    B -- Cabo --> L[Computador 5]
-    L -- WiFi --> M[Computador 6]
-    D -- Cabo --> N[Computador 7]
+    A[Servidor 1] -- Fibra --- B[Switch 1]
+    B -- WiFi --- C[Computador 1]
+    B -- Cabo --- D[Access Point 1]
+    D -- WiFi --- E[Computador 2]
+    B -- Satélite --- F[Servidor 2]
+    F -- Fibra --- G[Switch 2]
+    G -- Cabo --- H[Computador 3]
+    G -- WiFi --- I[Access Point 2]
+    I -- WiFi --- J[Computador 4]
+    G -- Satélite --- K[Servidor 3]
+    B -- Cabo --- L[Computador 5]
+    L -- WiFi --- M[Computador 6]
+    D -- Cabo --- N[Computador 7]
 ```
 
 Neste exemplo:

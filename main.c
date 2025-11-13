@@ -56,10 +56,6 @@ void seed_rede(Grafo* g);
 void exibir_dispositivos(Grafo* g);
 void exibir_menu();
 
-/**
- * @author João Gabriel de Almeida
- */
-
 // Função para popular a rede com dispositivos e conexões de exemplo
 void seed_rede(Grafo* g) {
     if (!g) return;

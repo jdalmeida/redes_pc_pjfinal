@@ -472,7 +472,7 @@ void gerar_mermaid(Grafo* g, FILE* arquivo) {
             if (i < j) {
                 int idx = i * g->num_vertices + j;
                 if (!visitado[idx]) {
-                    fprintf(arquivo, "    %d -- %s --> %d\n",
+                    fprintf(arquivo, "    %d -- %s --- %d\n",
                             i, tipo_conexao_str(atual->tipo), j);
                     visitado[idx] = 1;
                 }
