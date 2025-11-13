@@ -1,3 +1,7 @@
+/**
+ * @author João Gabriel de Almeida
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +49,8 @@ Grafo* criar_grafo(int capacidade);
 void destruir_grafo(Grafo* g);
 int adicionar_vertice(Grafo* g, TipoDispositivo tipo, const char* nome);
 int adicionar_aresta(Grafo* g, int origem, int destino, TipoConexao tipo);
+int remover_aresta(Grafo* g, int origem, int destino);
+int remover_vertice(Grafo* g, int id);
 int validar_conexao(TipoDispositivo origem, TipoDispositivo destino);
 void gerar_mermaid(Grafo* g, FILE* arquivo);
 const char* tipo_dispositivo_str(TipoDispositivo tipo);
@@ -175,6 +181,111 @@ int adicionar_aresta(Grafo* g, int origem, int destino, TipoConexao tipo) {
     nova_aresta_reversa->proxima = g->vertices[destino].lista_adjacencia;
     g->vertices[destino].lista_adjacencia = nova_aresta_reversa;
     
+    return 1;
+}
+
+// Remove uma aresta do grafo (grafo não orientado)
+int remover_aresta(Grafo* g, int origem, int destino) {
+    if (!g || origem < 0 || destino < 0 || 
+        origem >= g->num_vertices || destino >= g->num_vertices ||
+        origem == destino) {
+        return 0;
+    }
+    
+    int removido = 0;
+    
+    // Remove aresta origem -> destino
+    Aresta* atual = g->vertices[origem].lista_adjacencia;
+    Aresta* anterior = NULL;
+    
+    while (atual) {
+        if (atual->destino == destino) {
+            if (anterior) {
+                anterior->proxima = atual->proxima;
+            } else {
+                g->vertices[origem].lista_adjacencia = atual->proxima;
+            }
+            free(atual);
+            removido = 1;
+            break;
+        }
+        anterior = atual;
+        atual = atual->proxima;
+    }
+    
+    // Remove aresta destino -> origem (grafo não orientado)
+    atual = g->vertices[destino].lista_adjacencia;
+    anterior = NULL;
+    
+    while (atual) {
+        if (atual->destino == origem) {
+            if (anterior) {
+                anterior->proxima = atual->proxima;
+            } else {
+                g->vertices[destino].lista_adjacencia = atual->proxima;
+            }
+            free(atual);
+            break;
+        }
+        anterior = atual;
+        atual = atual->proxima;
+    }
+    
+    return removido;
+}
+
+// Remove um vértice do grafo
+int remover_vertice(Grafo* g, int id) {
+    if (!g || id < 0 || id >= g->num_vertices) {
+        return 0;
+    }
+    
+    // Remove todas as arestas conectadas a este vértice
+    Aresta* atual = g->vertices[id].lista_adjacencia;
+    while (atual) {
+        int destino = atual->destino;
+        Aresta* prox = atual->proxima;
+        
+        // Remove a aresta reversa
+        Aresta* atual_dest = g->vertices[destino].lista_adjacencia;
+        Aresta* anterior_dest = NULL;
+        
+        while (atual_dest) {
+            if (atual_dest->destino == id) {
+                if (anterior_dest) {
+                    anterior_dest->proxima = atual_dest->proxima;
+                } else {
+                    g->vertices[destino].lista_adjacencia = atual_dest->proxima;
+                }
+                free(atual_dest);
+                break;
+            }
+            anterior_dest = atual_dest;
+            atual_dest = atual_dest->proxima;
+        }
+        
+        free(atual);
+        atual = prox;
+    }
+    
+    // Move os vértices seguintes para preencher o espaço
+    for (int i = id; i < g->num_vertices - 1; i++) {
+        g->vertices[i] = g->vertices[i + 1];
+        g->vertices[i].id = i;
+    }
+    
+    // Atualiza referências em todos os vértices (decrementa destinos > id)
+    for (int i = 0; i < g->num_vertices - 1; i++) {
+        Aresta* atual_adj = g->vertices[i].lista_adjacencia;
+        while (atual_adj) {
+            if (atual_adj->destino > id) {
+                atual_adj->destino--;
+            }
+            atual_adj = atual_adj->proxima;
+        }
+    }
+    
+    g->num_vertices--;
     return 1;
 }
 

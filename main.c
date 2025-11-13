@@ -45,81 +45,312 @@ Grafo* criar_grafo(int capacidade);
 void destruir_grafo(Grafo* g);
 int adicionar_vertice(Grafo* g, TipoDispositivo tipo, const char* nome);
 int adicionar_aresta(Grafo* g, int origem, int destino, TipoConexao tipo);
+int remover_aresta(Grafo* g, int origem, int destino);
+int remover_vertice(Grafo* g, int id);
 void gerar_mermaid(Grafo* g, FILE* arquivo);
 const char* tipo_dispositivo_str(TipoDispositivo tipo);
 const char* tipo_conexao_str(TipoConexao tipo);
+void seed_rede(Grafo* g);
+void exibir_dispositivos(Grafo* g);
+void exibir_menu();
+
+/**
+ * @author João Gabriel de Almeida
+ */
+
+// Função para popular a rede com dispositivos e conexões de exemplo
+void seed_rede(Grafo* g) {
+    if (!g) return;
+    
+    // Adiciona dispositivos conforme o exemplo do README
+    int servidor1 = adicionar_vertice(g, SERVIDOR, "Servidor 1");
+    int switch1 = adicionar_vertice(g, SWITCH, "Switch 1");
+    int computador1 = adicionar_vertice(g, COMPUTADOR, "Computador 1");
+    int access_point1 = adicionar_vertice(g, ACCESS_POINT, "Access Point 1");
+    int computador2 = adicionar_vertice(g, COMPUTADOR, "Computador 2");
+    int servidor2 = adicionar_vertice(g, SERVIDOR, "Servidor 2");
+    int switch2 = adicionar_vertice(g, SWITCH, "Switch 2");
+    int computador3 = adicionar_vertice(g, COMPUTADOR, "Computador 3");
+    int access_point2 = adicionar_vertice(g, ACCESS_POINT, "Access Point 2");
+    int computador4 = adicionar_vertice(g, COMPUTADOR, "Computador 4");
+    int servidor3 = adicionar_vertice(g, SERVIDOR, "Servidor 3");
+    int computador5 = adicionar_vertice(g, COMPUTADOR, "Computador 5");
+    int computador6 = adicionar_vertice(g, COMPUTADOR, "Computador 6");
+    int computador7 = adicionar_vertice(g, COMPUTADOR, "Computador 7");
+    
+    // Adiciona conexões conforme o exemplo
+    adicionar_aresta(g, servidor1, switch1, FIBRA);
+    adicionar_aresta(g, switch1, computador1, WIFI);
+    adicionar_aresta(g, switch1, access_point1, CABO);
+    adicionar_aresta(g, access_point1, computador2, WIFI);
+    adicionar_aresta(g, switch1, servidor2, SATELITE);
+    adicionar_aresta(g, servidor2, switch2, FIBRA);
+    adicionar_aresta(g, switch2, computador3, CABO);
+    adicionar_aresta(g, switch2, access_point2, WIFI);
+    adicionar_aresta(g, access_point2, computador4, WIFI);
+    adicionar_aresta(g, switch2, servidor3, SATELITE);
+    adicionar_aresta(g, switch1, computador5, CABO);
+    adicionar_aresta(g, computador5, computador6, WIFI);
+    adicionar_aresta(g, access_point1, computador7, CABO);
+    
+    printf("Rede populada com dispositivos e conexões de exemplo!\n");
+}
+
+// Exibe todos os dispositivos da rede
+void exibir_dispositivos(Grafo* g) {
+    if (!g || g->num_vertices == 0) {
+        printf("Nenhum dispositivo cadastrado.\n\n");
+        return;
+    }
+    
+    printf("\n=== Dispositivos da Rede ===\n");
+    for (int i = 0; i < g->num_vertices; i++) {
+        printf("%d - %s (%s)\n", 
+               i + 1,
+               g->vertices[i].nome,
+               tipo_dispositivo_str(g->vertices[i].tipo));
+    }
+    printf("\n");
+}
+
+// Exibe o menu principal
+void exibir_menu() {
+    printf("\n=== MENU PRINCIPAL ===\n");
+    printf("1 - Adicionar dispositivo\n");
+    printf("2 - Remover dispositivo\n");
+    printf("3 - Adicionar conexão\n");
+    printf("4 - Remover conexão\n");
+    printf("5 - Listar dispositivos\n");
+    printf("6 - Exibir informações da rede\n");
+    printf("7 - Gerar arquivo Mermaid\n");
+    printf("8 - Popular rede (seed)\n");
+    printf("0 - Sair\n");
+    printf("Escolha uma opção: ");
+}
 
 int main() {
     // Cria o grafo com capacidade inicial
-    Grafo* rede = criar_grafo(20);
+    Grafo* rede = criar_grafo(50);
     if (!rede) {
         printf("Erro ao criar grafo!\n");
         return 1;
     }
     
-    // Adiciona dispositivos conforme o exemplo do README
-    int servidor1 = adicionar_vertice(rede, SERVIDOR, "Servidor 1");
-    int switch1 = adicionar_vertice(rede, SWITCH, "Switch 1");
-    int computador1 = adicionar_vertice(rede, COMPUTADOR, "Computador 1");
-    int access_point1 = adicionar_vertice(rede, ACCESS_POINT, "Access Point 1");
-    int computador2 = adicionar_vertice(rede, COMPUTADOR, "Computador 2");
-    int servidor2 = adicionar_vertice(rede, SERVIDOR, "Servidor 2");
-    int switch2 = adicionar_vertice(rede, SWITCH, "Switch 2");
-    int computador3 = adicionar_vertice(rede, COMPUTADOR, "Computador 3");
-    int access_point2 = adicionar_vertice(rede, ACCESS_POINT, "Access Point 2");
-    int computador4 = adicionar_vertice(rede, COMPUTADOR, "Computador 4");
-    int servidor3 = adicionar_vertice(rede, SERVIDOR, "Servidor 3");
-    int computador5 = adicionar_vertice(rede, COMPUTADOR, "Computador 5");
-    int computador6 = adicionar_vertice(rede, COMPUTADOR, "Computador 6");
-    int computador7 = adicionar_vertice(rede, COMPUTADOR, "Computador 7");
+    int opcao;
+    char nome[50];
+    int tipo_disp, tipo_conn;
+    int origem, destino;
+    int id;
     
-    // Adiciona conexões conforme o exemplo
-    adicionar_aresta(rede, servidor1, switch1, FIBRA);
-    adicionar_aresta(rede, switch1, computador1, WIFI);
-    adicionar_aresta(rede, switch1, access_point1, CABO);
-    adicionar_aresta(rede, access_point1, computador2, WIFI);
-    adicionar_aresta(rede, switch1, servidor2, SATELITE);
-    adicionar_aresta(rede, servidor2, switch2, FIBRA);
-    adicionar_aresta(rede, switch2, computador3, CABO);
-    adicionar_aresta(rede, switch2, access_point2, WIFI);
-    adicionar_aresta(rede, access_point2, computador4, WIFI);
-    adicionar_aresta(rede, switch2, servidor3, SATELITE);
-    adicionar_aresta(rede, switch1, computador5, CABO);
-    adicionar_aresta(rede, computador5, computador6, WIFI);
-    adicionar_aresta(rede, access_point1, computador7, CABO);
+    printf("=== Sistema de Gerenciamento de Rede ===\n");
     
-    // Gera o arquivo Mermaid
-    FILE* arquivo = fopen("rede.mmd", "w");
-    if (arquivo) {
-        gerar_mermaid(rede, arquivo);
-        fclose(arquivo);
-        printf("Grafo gerado com sucesso em 'rede.mmd'!\n");
-    } else {
-        printf("Erro ao criar arquivo de saída!\n");
-    }
-    
-    // Exibe informações da rede
-    printf("\n=== Informações da Rede ===\n");
-    printf("Total de dispositivos: %d\n\n", rede->num_vertices);
-    
-    for (int i = 0; i < rede->num_vertices; i++) {
-        printf("%s %d (%s):\n", 
-               tipo_dispositivo_str(rede->vertices[i].tipo),
-               i + 1,
-               rede->vertices[i].nome);
+    do {
+        exibir_menu();
+        scanf("%d", &opcao);
         
-        Aresta* atual = rede->vertices[i].lista_adjacencia;
-        int num_conexoes = 0;
-        while (atual) {
-            num_conexoes++;
-            printf("  -> Conectado a %s %d via %s\n",
-                   tipo_dispositivo_str(rede->vertices[atual->destino].tipo),
-                   atual->destino + 1,
-                   tipo_conexao_str(atual->tipo));
-            atual = atual->proxima;
+        switch (opcao) {
+            case 1: // Adicionar dispositivo
+                printf("\n--- Adicionar Dispositivo ---\n");
+                printf("Tipo de dispositivo:\n");
+                printf("0 - Servidor\n");
+                printf("1 - Switch\n");
+                printf("2 - Computador\n");
+                printf("3 - Access Point\n");
+                printf("Escolha: ");
+                scanf("%d", &tipo_disp);
+                
+                if (tipo_disp < 0 || tipo_disp > 3) {
+                    printf("Tipo inválido!\n");
+                    break;
+                }
+                
+                printf("Nome do dispositivo: ");
+                scanf(" %[^\n]", nome);
+                
+                id = adicionar_vertice(rede, (TipoDispositivo)tipo_disp, nome);
+                if (id >= 0) {
+                    printf("Dispositivo '%s' adicionado com ID %d!\n", nome, id + 1);
+                } else {
+                    printf("Erro ao adicionar dispositivo! Capacidade máxima atingida.\n");
+                }
+                break;
+                
+            case 2: // Remover dispositivo
+                printf("\n--- Remover Dispositivo ---\n");
+                exibir_dispositivos(rede);
+                
+                if (rede->num_vertices == 0) {
+                    break;
+                }
+                
+                printf("ID do dispositivo a remover (1-%d): ", rede->num_vertices);
+                scanf("%d", &id);
+                id--; // Converter para índice baseado em 0
+                
+                if (id >= 0 && id < rede->num_vertices) {
+                    char nome_removido[50];
+                    strcpy(nome_removido, rede->vertices[id].nome);
+                    
+                    if (remover_vertice(rede, id)) {
+                        printf("Dispositivo '%s' removido com sucesso!\n", nome_removido);
+                    } else {
+                        printf("Erro ao remover dispositivo!\n");
+                    }
+                } else {
+                    printf("ID inválido!\n");
+                }
+                break;
+                
+            case 3: // Adicionar conexão
+                printf("\n--- Adicionar Conexão ---\n");
+                exibir_dispositivos(rede);
+                
+                if (rede->num_vertices < 2) {
+                    printf("É necessário pelo menos 2 dispositivos para criar uma conexão.\n");
+                    break;
+                }
+                
+                printf("ID do dispositivo origem (1-%d): ", rede->num_vertices);
+                scanf("%d", &origem);
+                origem--;
+                
+                printf("ID do dispositivo destino (1-%d): ", rede->num_vertices);
+                scanf("%d", &destino);
+                destino--;
+                
+                if (origem < 0 || origem >= rede->num_vertices ||
+                    destino < 0 || destino >= rede->num_vertices ||
+                    origem == destino) {
+                    printf("IDs inválidos!\n");
+                    break;
+                }
+                
+                printf("Tipo de conexão:\n");
+                printf("0 - Satélite\n");
+                printf("1 - WiFi\n");
+                printf("2 - Cabo\n");
+                printf("3 - Fibra\n");
+                printf("Escolha: ");
+                scanf("%d", &tipo_conn);
+                
+                if (tipo_conn < 0 || tipo_conn > 3) {
+                    printf("Tipo inválido!\n");
+                    break;
+                }
+                
+                if (adicionar_aresta(rede, origem, destino, (TipoConexao)tipo_conn)) {
+                    printf("Conexão adicionada com sucesso!\n");
+                } else {
+                    printf("Erro ao adicionar conexão! Verifique se a conexão é válida ou já existe.\n");
+                }
+                break;
+                
+            case 4: // Remover conexão
+                printf("\n--- Remover Conexão ---\n");
+                exibir_dispositivos(rede);
+                
+                if (rede->num_vertices < 2) {
+                    printf("Não há conexões para remover.\n");
+                    break;
+                }
+                
+                printf("ID do dispositivo origem (1-%d): ", rede->num_vertices);
+                scanf("%d", &origem);
+                origem--;
+                
+                printf("ID do dispositivo destino (1-%d): ", rede->num_vertices);
+                scanf("%d", &destino);
+                destino--;
+                
+                if (origem < 0 || origem >= rede->num_vertices ||
+                    destino < 0 || destino >= rede->num_vertices ||
+                    origem == destino) {
+                    printf("IDs inválidos!\n");
+                    break;
+                }
+                
+                if (remover_aresta(rede, origem, destino)) {
+                    printf("Conexão removida com sucesso!\n");
+                } else {
+                    printf("Conexão não encontrada!\n");
+                }
+                break;
+                
+            case 5: // Listar dispositivos
+                exibir_dispositivos(rede);
+                break;
+                
+            case 6: // Exibir informações da rede
+                printf("\n=== Informações da Rede ===\n");
+                printf("Total de dispositivos: %d\n\n", rede->num_vertices);
+                
+                if (rede->num_vertices == 0) {
+                    printf("Nenhum dispositivo cadastrado.\n");
+                    break;
+                }
+                
+                for (int i = 0; i < rede->num_vertices; i++) {
+                    printf("%s %d (%s):\n", 
+                           tipo_dispositivo_str(rede->vertices[i].tipo),
+                           i + 1,
+                           rede->vertices[i].nome);
+                    
+                    Aresta* atual = rede->vertices[i].lista_adjacencia;
+                    int num_conexoes = 0;
+                    while (atual) {
+                        num_conexoes++;
+                        printf("  -> Conectado a %s %d via %s\n",
+                               tipo_dispositivo_str(rede->vertices[atual->destino].tipo),
+                               atual->destino + 1,
+                               tipo_conexao_str(atual->tipo));
+                        atual = atual->proxima;
+                    }
+                    printf("  Total de conexões: %d\n\n", num_conexoes);
+                }
+                break;
+                
+            case 7: // Gerar arquivo Mermaid
+                {
+                    FILE* arquivo = fopen("rede.mmd", "w");
+                    if (arquivo) {
+                        gerar_mermaid(rede, arquivo);
+                        fclose(arquivo);
+                        printf("Grafo gerado com sucesso em 'rede.mmd'!\n");
+                    } else {
+                        printf("Erro ao criar arquivo de saída!\n");
+                    }
+                }
+                break;
+                
+            case 8: // Popular rede (seed)
+                if (rede->num_vertices > 0) {
+                    printf("Atenção: A rede já possui dispositivos. Deseja limpar e popular novamente? (1=Sim, 0=Não): ");
+                    int confirmar;
+                    scanf("%d", &confirmar);
+                    if (confirmar == 1) {
+                        destruir_grafo(rede);
+                        rede = criar_grafo(50);
+                        if (!rede) {
+                            printf("Erro ao recriar grafo!\n");
+                            return 1;
+                        }
+                        seed_rede(rede);
+                    }
+                } else {
+                    seed_rede(rede);
+                }
+                break;
+                
+            case 0: // Sair
+                printf("Encerrando programa...\n");
+                break;
+                
+            default:
+                printf("Opção inválida! Tente novamente.\n");
+                break;
         }
-        printf("  Total de conexões: %d\n\n", num_conexoes);
-    }
+        
+    } while (opcao != 0);
     
     // Libera memória
     destruir_grafo(rede);
