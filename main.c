@@ -50,6 +50,8 @@ int remover_vertice(Grafo* g, int id);
 void gerar_mermaid(Grafo* g, FILE* arquivo);
 const char* tipo_dispositivo_str(TipoDispositivo tipo);
 const char* tipo_conexao_str(TipoConexao tipo);
+int encontrar_rota_mais_rapida(Grafo* g, int origem, int destino, int* caminho, int* tamanho_caminho);
+int obter_peso_conexao(TipoConexao tipo);
 void seed_rede(Grafo* g);
 void exibir_dispositivos(Grafo* g);
 void exibir_menu();
@@ -124,6 +126,7 @@ void exibir_menu() {
     printf("6 - Exibir informações da rede\n");
     printf("7 - Gerar arquivo Mermaid\n");
     printf("8 - Popular rede (seed)\n");
+    printf("9 - Calcular rota mais rápida\n");
     printf("0 - Sair\n");
     printf("Escolha uma opção: ");
 }
@@ -338,6 +341,91 @@ int main() {
                     }
                 } else {
                     seed_rede(rede);
+                }
+                break;
+                
+            case 9: // Calcular rota mais rápida
+                {
+                    printf("\n--- Calcular Rota Mais Rápida ---\n");
+                    exibir_dispositivos(rede);
+                    
+                    if (rede->num_vertices < 2) {
+                        printf("É necessário pelo menos 2 dispositivos para calcular uma rota.\n");
+                        break;
+                    }
+                    
+                    printf("ID do dispositivo origem (1-%d): ", rede->num_vertices);
+                    scanf("%d", &origem);
+                    origem--;
+                    
+                    printf("ID do dispositivo destino (1-%d): ", rede->num_vertices);
+                    scanf("%d", &destino);
+                    destino--;
+                    
+                    if (origem < 0 || origem >= rede->num_vertices ||
+                        destino < 0 || destino >= rede->num_vertices ||
+                        origem == destino) {
+                        printf("IDs inválidos!\n");
+                        break;
+                    }
+                    
+                    // Aloca array para o caminho
+                    int* caminho = (int*)malloc(rede->num_vertices * sizeof(int));
+                    int tamanho_caminho = 0;
+                    
+                    if (!caminho) {
+                        printf("Erro ao alocar memória!\n");
+                        break;
+                    }
+                    
+                    if (encontrar_rota_mais_rapida(rede, origem, destino, caminho, &tamanho_caminho)) {
+                        printf("\n=== Rota Mais Rápida Encontrada ===\n");
+                        printf("De: %s (%s)\n", 
+                               rede->vertices[origem].nome,
+                               tipo_dispositivo_str(rede->vertices[origem].tipo));
+                        printf("Para: %s (%s)\n\n",
+                               rede->vertices[destino].nome,
+                               tipo_dispositivo_str(rede->vertices[destino].tipo));
+                        
+                        int peso_total = 0;
+                        printf("Caminho:\n");
+                        for (int i = 0; i < tamanho_caminho; i++) {
+                            printf("  %d. %s (%s)", 
+                                   i + 1,
+                                   rede->vertices[caminho[i]].nome,
+                                   tipo_dispositivo_str(rede->vertices[caminho[i]].tipo));
+                            
+                            if (i < tamanho_caminho - 1) {
+                                // Encontra o tipo de conexão entre caminho[i] e caminho[i+1]
+                                Aresta* atual = rede->vertices[caminho[i]].lista_adjacencia;
+                                TipoConexao tipo_conn = SATELITE;
+                                
+                                while (atual) {
+                                    if (atual->destino == caminho[i + 1]) {
+                                        tipo_conn = atual->tipo;
+                                        break;
+                                    }
+                                    atual = atual->proxima;
+                                }
+                                
+                                int peso = obter_peso_conexao(tipo_conn);
+                                peso_total += peso;
+                                
+                                printf(" --[%s (peso: %d)]--> ", 
+                                       tipo_conexao_str(tipo_conn),
+                                       peso);
+                            } else {
+                                printf("\n");
+                            }
+                        }
+                        
+                        printf("\nPeso total da rota: %d\n", peso_total);
+                        printf("(Fibra=0, Cabo=1, WiFi=2, Satélite=3 - menor é melhor)\n");
+                    } else {
+                        printf("Não foi possível encontrar uma rota entre os dispositivos selecionados.\n");
+                    }
+                    
+                    free(caminho);
                 }
                 break;
                 

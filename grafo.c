@@ -55,6 +55,9 @@ int validar_conexao(TipoDispositivo origem, TipoDispositivo destino);
 void gerar_mermaid(Grafo* g, FILE* arquivo);
 const char* tipo_dispositivo_str(TipoDispositivo tipo);
 const char* tipo_conexao_str(TipoConexao tipo);
+int obter_peso_conexao(TipoConexao tipo);
+int dfs_rota_mais_rapida(Grafo* g, int atual, int destino, int* visitado, int* caminho_atual, int* melhor_caminho, int profundidade, int peso_atual, int* melhor_peso, int max_profundidade);
+int encontrar_rota_mais_rapida(Grafo* g, int origem, int destino, int* caminho, int* tamanho_caminho);
 
 // Cria um novo grafo
 Grafo* criar_grafo(int capacidade) {
@@ -309,6 +312,140 @@ const char* tipo_conexao_str(TipoConexao tipo) {
         case FIBRA: return "Fibra";
         default: return "Desconhecido";
     }
+}
+
+// Retorna o peso de uma conexão baseado no tipo
+// Fibra: 0, Cabo: 1, WiFi: 2, Satélite: 3
+int obter_peso_conexao(TipoConexao tipo) {
+    switch (tipo) {
+        case FIBRA: return 0;
+        case CABO: return 1;
+        case WIFI: return 2;
+        case SATELITE: return 3;
+        default: return 999; // Peso muito alto para tipos desconhecidos
+    }
+}
+
+// Função auxiliar DFS recursiva para encontrar a rota mais rápida
+// Retorna 1 se encontrou um caminho melhor, 0 caso contrário
+int dfs_rota_mais_rapida(Grafo* g, int atual, int destino, int* visitado, 
+                         int* caminho_atual, int* melhor_caminho, 
+                         int profundidade, int peso_atual, int* melhor_peso, 
+                         int max_profundidade) {
+    // Se atingiu o destino
+    if (atual == destino) {
+        if (peso_atual < *melhor_peso) {
+            *melhor_peso = peso_atual;
+            // Copia o caminho atual para o melhor caminho (incluindo o destino)
+            caminho_atual[profundidade] = atual; // Garante que o destino está no caminho
+            for (int i = 0; i <= profundidade; i++) {
+                melhor_caminho[i] = caminho_atual[i];
+            }
+            // Marca o fim do caminho
+            if (profundidade + 1 < max_profundidade) {
+                melhor_caminho[profundidade + 1] = -1;
+            }
+            return 1;
+        }
+        return 0;
+    }
+    
+    // Se excedeu a profundidade máxima ou o peso já é maior que o melhor
+    if (profundidade >= max_profundidade || peso_atual >= *melhor_peso) {
+        return 0;
+    }
+    
+    // Marca o vértice atual como visitado
+    visitado[atual] = 1;
+    caminho_atual[profundidade] = atual;
+    
+    // Explora todos os vizinhos
+    Aresta* atual_aresta = g->vertices[atual].lista_adjacencia;
+    int encontrou_melhor = 0;
+    
+    while (atual_aresta) {
+        int vizinho = atual_aresta->destino;
+        
+        // Se o vizinho não foi visitado ainda
+        if (!visitado[vizinho]) {
+            int peso_aresta = obter_peso_conexao(atual_aresta->tipo);
+            int novo_peso = peso_atual + peso_aresta;
+            
+            // Continua a busca recursivamente
+            if (dfs_rota_mais_rapida(g, vizinho, destino, visitado, 
+                                    caminho_atual, melhor_caminho, 
+                                    profundidade + 1, novo_peso, melhor_peso, 
+                                    max_profundidade)) {
+                encontrou_melhor = 1;
+            }
+        }
+        
+        atual_aresta = atual_aresta->proxima;
+    }
+    
+    // Desmarca o vértice atual (backtracking)
+    visitado[atual] = 0;
+    
+    return encontrou_melhor;
+}
+
+// Encontra a rota mais rápida entre origem e destino usando DFS
+// Retorna 1 se encontrou um caminho, 0 caso contrário
+// O caminho encontrado é armazenado em 'caminho' e o tamanho em 'tamanho_caminho'
+int encontrar_rota_mais_rapida(Grafo* g, int origem, int destino, 
+                               int* caminho, int* tamanho_caminho) {
+    if (!g || origem < 0 || destino < 0 || 
+        origem >= g->num_vertices || destino >= g->num_vertices ||
+        origem == destino) {
+        return 0;
+    }
+    
+    // Aloca arrays temporários
+    int* visitado = (int*)calloc(g->num_vertices, sizeof(int));
+    int* caminho_atual = (int*)malloc(g->num_vertices * sizeof(int));
+    int* melhor_caminho = (int*)malloc(g->num_vertices * sizeof(int));
+    
+    if (!visitado || !caminho_atual || !melhor_caminho) {
+        if (visitado) free(visitado);
+        if (caminho_atual) free(caminho_atual);
+        if (melhor_caminho) free(melhor_caminho);
+        return 0;
+    }
+    
+    // Inicializa melhor_caminho com -1
+    for (int i = 0; i < g->num_vertices; i++) {
+        melhor_caminho[i] = -1;
+    }
+    
+    // Inicializa o melhor peso com um valor muito alto
+    int melhor_peso = 999999;
+    
+    // Limite de profundidade para evitar loops infinitos
+    // Usa o número de vértices como limite máximo
+    int max_profundidade = g->num_vertices;
+    
+    // Inicia a busca DFS
+    caminho_atual[0] = origem;
+    int encontrou = dfs_rota_mais_rapida(g, origem, destino, visitado, 
+                                        caminho_atual, melhor_caminho, 
+                                        0, 0, &melhor_peso, max_profundidade);
+    
+    if (encontrou) {
+        // Copia o melhor caminho encontrado (já inclui origem e destino)
+        int tamanho = 0;
+        for (int i = 0; i < max_profundidade && melhor_caminho[i] != -1; i++) {
+            caminho[i] = melhor_caminho[i];
+            tamanho++;
+        }
+        *tamanho_caminho = tamanho;
+    }
+    
+    // Libera memória
+    free(visitado);
+    free(caminho_atual);
+    free(melhor_caminho);
+    
+    return encontrou;
 }
 
 // Gera saída em formato Mermaid
