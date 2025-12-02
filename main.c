@@ -59,7 +59,7 @@ void exibir_menu();
 // Função para popular a rede com dispositivos e conexões de exemplo
 void seed_rede(Grafo* g) {
     if (!g) return;
-    
+
     // Adiciona dispositivos conforme o exemplo do README
     int servidor1 = adicionar_vertice(g, SERVIDOR, "Servidor 1");
     int switch1 = adicionar_vertice(g, SWITCH, "Switch 1");
@@ -75,7 +75,7 @@ void seed_rede(Grafo* g) {
     int computador5 = adicionar_vertice(g, COMPUTADOR, "Computador 5");
     int computador6 = adicionar_vertice(g, COMPUTADOR, "Computador 6");
     int computador7 = adicionar_vertice(g, COMPUTADOR, "Computador 7");
-    
+
     // Adiciona conexões conforme o exemplo
     adicionar_aresta(g, servidor1, switch1, FIBRA);
     adicionar_aresta(g, switch1, computador1, WIFI);
@@ -90,7 +90,7 @@ void seed_rede(Grafo* g) {
     adicionar_aresta(g, switch1, computador5, CABO);
     adicionar_aresta(g, computador5, computador6, WIFI);
     adicionar_aresta(g, access_point1, computador7, CABO);
-    
+
     printf("Rede populada com dispositivos e conexões de exemplo!\n");
 }
 
@@ -100,10 +100,10 @@ void exibir_dispositivos(Grafo* g) {
         printf("Nenhum dispositivo cadastrado.\n\n");
         return;
     }
-    
+
     printf("\n=== Dispositivos da Rede ===\n");
     for (int i = 0; i < g->num_vertices; i++) {
-        printf("%d - %s (%s)\n", 
+        printf("%d - %s (%s)\n",
                i + 1,
                g->vertices[i].nome,
                tipo_dispositivo_str(g->vertices[i].tipo));
@@ -134,19 +134,19 @@ int main() {
         printf("Erro ao criar grafo!\n");
         return 1;
     }
-    
+
     int opcao;
     char nome[50];
     int tipo_disp, tipo_conn;
     int origem, destino;
     int id;
-    
+
     printf("=== Sistema de Gerenciamento de Rede ===\n");
-    
+
     do {
         exibir_menu();
         scanf("%d", &opcao);
-        
+
         switch (opcao) {
             case 1: // Adicionar dispositivo
                 printf("\n--- Adicionar Dispositivo ---\n");
@@ -157,15 +157,15 @@ int main() {
                 printf("3 - Access Point\n");
                 printf("Escolha: ");
                 scanf("%d", &tipo_disp);
-                
+
                 if (tipo_disp < 0 || tipo_disp > 3) {
                     printf("Tipo inválido!\n");
                     break;
                 }
-                
+
                 printf("Nome do dispositivo: ");
                 scanf(" %[^\n]", nome);
-                
+
                 id = adicionar_vertice(rede, (TipoDispositivo)tipo_disp, nome);
                 if (id >= 0) {
                     printf("Dispositivo '%s' adicionado com ID %d!\n", nome, id + 1);
@@ -173,23 +173,23 @@ int main() {
                     printf("Erro ao adicionar dispositivo! Capacidade máxima atingida.\n");
                 }
                 break;
-                
+
             case 2: // Remover dispositivo
                 printf("\n--- Remover Dispositivo ---\n");
                 exibir_dispositivos(rede);
-                
+
                 if (rede->num_vertices == 0) {
                     break;
                 }
-                
+
                 printf("ID do dispositivo a remover (1-%d): ", rede->num_vertices);
                 scanf("%d", &id);
                 id--; // Converter para índice baseado em 0
-                
+
                 if (id >= 0 && id < rede->num_vertices) {
                     char nome_removido[50];
                     strcpy(nome_removido, rede->vertices[id].nome);
-                    
+
                     if (remover_vertice(rede, id)) {
                         printf("Dispositivo '%s' removido com sucesso!\n", nome_removido);
                     } else {
@@ -199,31 +199,31 @@ int main() {
                     printf("ID inválido!\n");
                 }
                 break;
-                
+
             case 3: // Adicionar conexão
                 printf("\n--- Adicionar Conexão ---\n");
                 exibir_dispositivos(rede);
-                
+
                 if (rede->num_vertices < 2) {
                     printf("É necessário pelo menos 2 dispositivos para criar uma conexão.\n");
                     break;
                 }
-                
+
                 printf("ID do dispositivo origem (1-%d): ", rede->num_vertices);
                 scanf("%d", &origem);
                 origem--;
-                
+
                 printf("ID do dispositivo destino (1-%d): ", rede->num_vertices);
                 scanf("%d", &destino);
                 destino--;
-                
+
                 if (origem < 0 || origem >= rede->num_vertices ||
                     destino < 0 || destino >= rede->num_vertices ||
                     origem == destino) {
                     printf("IDs inválidos!\n");
                     break;
                 }
-                
+
                 printf("Tipo de conexão:\n");
                 printf("0 - Satélite\n");
                 printf("1 - WiFi\n");
@@ -231,69 +231,69 @@ int main() {
                 printf("3 - Fibra\n");
                 printf("Escolha: ");
                 scanf("%d", &tipo_conn);
-                
+
                 if (tipo_conn < 0 || tipo_conn > 3) {
                     printf("Tipo inválido!\n");
                     break;
                 }
-                
+
                 if (adicionar_aresta(rede, origem, destino, (TipoConexao)tipo_conn)) {
                     printf("Conexão adicionada com sucesso!\n");
                 } else {
                     printf("Erro ao adicionar conexão! Verifique se a conexão é válida ou já existe.\n");
                 }
                 break;
-                
+
             case 4: // Remover conexão
                 printf("\n--- Remover Conexão ---\n");
                 exibir_dispositivos(rede);
-                
+
                 if (rede->num_vertices < 2) {
                     printf("Não há conexões para remover.\n");
                     break;
                 }
-                
+
                 printf("ID do dispositivo origem (1-%d): ", rede->num_vertices);
                 scanf("%d", &origem);
                 origem--;
-                
+
                 printf("ID do dispositivo destino (1-%d): ", rede->num_vertices);
                 scanf("%d", &destino);
                 destino--;
-                
+
                 if (origem < 0 || origem >= rede->num_vertices ||
                     destino < 0 || destino >= rede->num_vertices ||
                     origem == destino) {
                     printf("IDs inválidos!\n");
                     break;
                 }
-                
+
                 if (remover_aresta(rede, origem, destino)) {
                     printf("Conexão removida com sucesso!\n");
                 } else {
                     printf("Conexão não encontrada!\n");
                 }
                 break;
-                
+
             case 5: // Listar dispositivos
                 exibir_dispositivos(rede);
                 break;
-                
+
             case 6: // Exibir informações da rede
                 printf("\n=== Informações da Rede ===\n");
                 printf("Total de dispositivos: %d\n\n", rede->num_vertices);
-                
+
                 if (rede->num_vertices == 0) {
                     printf("Nenhum dispositivo cadastrado.\n");
                     break;
                 }
-                
+
                 for (int i = 0; i < rede->num_vertices; i++) {
-                    printf("%s %d (%s):\n", 
+                    printf("%s %d (%s):\n",
                            tipo_dispositivo_str(rede->vertices[i].tipo),
                            i + 1,
                            rede->vertices[i].nome);
-                    
+
                     Aresta* atual = rede->vertices[i].lista_adjacencia;
                     int num_conexoes = 0;
                     while (atual) {
@@ -307,7 +307,7 @@ int main() {
                     printf("  Total de conexões: %d\n\n", num_conexoes);
                 }
                 break;
-                
+
             case 7: // Gerar arquivo Mermaid
                 {
                     FILE* arquivo = fopen("rede.mmd", "w");
@@ -320,7 +320,7 @@ int main() {
                     }
                 }
                 break;
-                
+
             case 8: // Popular rede (seed)
                 if (rede->num_vertices > 0) {
                     printf("Atenção: A rede já possui dispositivos. Deseja limpar e popular novamente? (1=Sim, 0=Não): ");
@@ -339,63 +339,63 @@ int main() {
                     seed_rede(rede);
                 }
                 break;
-                
+
             case 9: // Calcular rota mais rápida
                 {
                     printf("\n--- Calcular Rota Mais Rápida ---\n");
                     exibir_dispositivos(rede);
-                    
+
                     if (rede->num_vertices < 2) {
                         printf("É necessário pelo menos 2 dispositivos para calcular uma rota.\n");
                         break;
                     }
-                    
+
                     printf("ID do dispositivo origem (1-%d): ", rede->num_vertices);
                     scanf("%d", &origem);
                     origem--;
-                    
+
                     printf("ID do dispositivo destino (1-%d): ", rede->num_vertices);
                     scanf("%d", &destino);
                     destino--;
-                    
+
                     if (origem < 0 || origem >= rede->num_vertices ||
                         destino < 0 || destino >= rede->num_vertices ||
                         origem == destino) {
                         printf("IDs inválidos!\n");
                         break;
                     }
-                    
+
                     // Aloca array para o caminho
                     int* caminho = (int*)malloc(rede->num_vertices * sizeof(int));
                     int tamanho_caminho = 0;
-                    
+
                     if (!caminho) {
                         printf("Erro ao alocar memória!\n");
                         break;
                     }
-                    
+
                     if (encontrar_rota_mais_rapida(rede, origem, destino, caminho, &tamanho_caminho)) {
                         printf("\n=== Rota Mais Rápida Encontrada ===\n");
-                        printf("De: %s (%s)\n", 
+                        printf("De: %s (%s)\n",
                                rede->vertices[origem].nome,
                                tipo_dispositivo_str(rede->vertices[origem].tipo));
                         printf("Para: %s (%s)\n\n",
                                rede->vertices[destino].nome,
                                tipo_dispositivo_str(rede->vertices[destino].tipo));
-                        
+
                         int peso_total = 0;
                         printf("Caminho:\n");
                         for (int i = 0; i < tamanho_caminho; i++) {
-                            printf("  %d. %s (%s)", 
+                            printf("  %d. %s (%s)",
                                    i + 1,
                                    rede->vertices[caminho[i]].nome,
                                    tipo_dispositivo_str(rede->vertices[caminho[i]].tipo));
-                            
+
                             if (i < tamanho_caminho - 1) {
                                 // Encontra o tipo de conexão entre caminho[i] e caminho[i+1]
                                 Aresta* atual = rede->vertices[caminho[i]].lista_adjacencia;
                                 TipoConexao tipo_conn = SATELITE;
-                                
+
                                 while (atual) {
                                     if (atual->destino == caminho[i + 1]) {
                                         tipo_conn = atual->tipo;
@@ -403,41 +403,41 @@ int main() {
                                     }
                                     atual = atual->proxima;
                                 }
-                                
+
                                 int peso = obter_peso_conexao(tipo_conn);
                                 peso_total += peso;
-                                
-                                printf(" --[%s (peso: %d)]--> ", 
+
+                                printf(" --[%s (peso: %d)]--> ",
                                        tipo_conexao_str(tipo_conn),
                                        peso);
                             } else {
                                 printf("\n");
                             }
                         }
-                        
+
                         printf("\nPeso total da rota: %d\n", peso_total);
                         printf("(Fibra=0, Cabo=1, WiFi=2, Satélite=3 - menor é melhor)\n");
                     } else {
                         printf("Não foi possível encontrar uma rota entre os dispositivos selecionados.\n");
                     }
-                    
+
                     free(caminho);
                 }
                 break;
-                
+
             case 0: // Sair
                 printf("Encerrando programa...\n");
                 break;
-                
+
             default:
                 printf("Opção inválida! Tente novamente.\n");
                 break;
         }
-        
+
     } while (opcao != 0);
-    
+
     // Libera memória
     destruir_grafo(rede);
-    
+
     return 0;
 }
