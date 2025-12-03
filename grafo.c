@@ -136,7 +136,7 @@ int validar_conexao(TipoDispositivo origem, TipoDispositivo destino) {
     return 0;
 }
 
-// Adiciona uma aresta ao grafo (grafo não orientado)
+// Adiciona uma aresta ao grafo
 int adicionar_aresta(Grafo* g, int origem, int destino, TipoConexao tipo) {
     if (!g || origem < 0 || destino < 0 ||
         origem >= g->num_vertices || destino >= g->num_vertices ||
@@ -183,7 +183,7 @@ int adicionar_aresta(Grafo* g, int origem, int destino, TipoConexao tipo) {
     return 1;
 }
 
-// Remove uma aresta do grafo (grafo não orientado)
+// Remove uma aresta do grafo
 int remover_aresta(Grafo* g, int origem, int destino) {
     if (!g || origem < 0 || destino < 0 ||
         origem >= g->num_vertices || destino >= g->num_vertices ||

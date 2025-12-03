@@ -1,6 +1,20 @@
+/**
+    Tema escolhido: Rede de Computadores (Topologia de Rede)
+    Tipo de grafo (orientado ou não orientado): Não orientado
+    Tipo de representação usada: Matriz de Adjacência
+    Tipo de percurso implementado: Busca em Profundidade (DFS)
+    Funcionalidades adicionais implementadas: Cálculo de rota mais rápida
+    Integrantes do grupo:
+    - João Gabriel de Almeida
+    - Eliézer Natã Reips
+    - Murilo Glasenapp Borstmann
+    - Thiago Mayer
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 
 // Tipos de dispositivo
 typedef enum {
@@ -128,6 +142,8 @@ void exibir_menu() {
 }
 
 int main() {
+
+    setlocale(LC_ALL, "pt_BR.UTF-8");
     // Cria o grafo com capacidade inicial
     Grafo* rede = criar_grafo(50);
     if (!rede) {
@@ -184,7 +200,7 @@ int main() {
 
                 printf("ID do dispositivo a remover (1-%d): ", rede->num_vertices);
                 scanf("%d", &id);
-                id--; // Converter para índice baseado em 0
+                id--; // Converter para índice baseado em 0: id para o usuário começa em 1
 
                 if (id >= 0 && id < rede->num_vertices) {
                     char nome_removido[50];
@@ -327,15 +343,18 @@ int main() {
                     int confirmar;
                     scanf("%d", &confirmar);
                     if (confirmar == 1) {
+                        // Reinicia a rede
                         destruir_grafo(rede);
                         rede = criar_grafo(50);
                         if (!rede) {
                             printf("Erro ao recriar grafo!\n");
                             return 1;
                         }
+                        // Popular a rede novamente
                         seed_rede(rede);
                     }
                 } else {
+                    // se não houver dispositivos, popular a rede
                     seed_rede(rede);
                 }
                 break;
